@@ -85,7 +85,7 @@ def rabin_karp(text, pattern, d):
         print("Anzahl der Suchschritte:", cSchritte)
         print("benoetigte Laufzeit:", runtime, "s")
 
-def computePrefixFunc(pattern):
+def compute_prefix_function(pattern):
     m = len(pattern)
     pi = []
     pi.append(0)
@@ -145,9 +145,9 @@ def compute_good_suffix_function(p, m):
     pi2 = compute_prefix_function(p2)
     gamma = []
     for j in range(0, m):
-        gamma.append(m-pi[m])
+        gamma.append(m-1-pi[m-1])
     for l in range(0, m):
-        j = m-pi2[l]
+        j = m-1-pi2[l]
         if gamma[j] > l-pi2[l]:
             gamma[j] = l-pi2[l]
     return gamma
@@ -160,12 +160,14 @@ def boyer_moore(t, p, sigma):
     s = 0
     while s <= n-m:
         j = m-1
+        print(j, s, p[j], t[s+j])
         while j >= 0 and p[j] == t[s+j]:
+            print(j, s)
             j-=1
         if j==-1:
             print("Muster taucht mit Verschiebung", s-1, "auf.")
-            s = s + gamma[0]
+            s += gamma[0]
         else:
-            s = max(gamma[j], j-lam[t[s+j]])
+            s += max(gamma[j], j-lam[t[s+j]])
 
 
