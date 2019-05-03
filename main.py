@@ -83,15 +83,89 @@ def rabin_karp(text, pattern, d):
         # wird die Anzahl der Suchschritte ausgegeben
         print("Gesamt:", cFunde, "Fund(e)")
         print("Anzahl der Suchschritte:", cSchritte)
-        print("benoetigte Laufzeit:", time, "s")
+        print("benoetigte Laufzeit:", runtime, "s")
 
+def computePrefixFunc(pattern):
+    m = len(pattern)
+    pi = []
+    pi.append(0)
+    k = 0
+    for q in range(1,m):
+        while (k>0 and pattern[k]!=pattern[q]):
+            k = pi[k]
+        if pattern[k]==pattern[q]:
+            k = k+1
+        pi.append(k)
+    return pi
 
-def knuth_morris_pratt(t, p):
+def knuth_morris_pratt(text, pattern):
+    # Start der Zeitmessung
+    startTime = datetime.now()
+
+    #Initialisierung
+    cSchritt = 0
+    cFunde = 0
+    n = len(text)
+    m = len(pattern)
+    pi = computePrefixFunc(pattern)
+    q = 0
+
+    #Matching
+    for i in range(0,n):
+        while(q>0 and pattern[q]!=text[i]):
+            q = pi[q-1]
+        if pattern[q] == text[i]:
+            q = q+1
+        if q == m:
+            print("Das Muster taucht mit Verschiebung", i+1-m, "auf")
+            q = pi[q-1]
+            cFunde += 1
+        cSchritt += 1
+
+    # Messungd er verbrauchten Zeit
+    runtime = datetime.now() - startTime
+
+    # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
+    # wird die Anzahl der Suchschritte ausgegeben
+    print("Gesamt:", cFunde, "Fund(e)")
+    print("Anzahl der Suchschritte:", cSchritt)
+    print("benoetigte Laufzeit:", runtime)
+
+def compute_last_occurence_function(p, m, sigma):
+    lam = {}
+    for a in sigma:
+        lam.update({a:0})
+    for j in range(0, m):
+        lam[p[j]]=j
+    return lam
+
+def compute_good_suffix_function(p, m):
+    pi = compute_prefix_function(p)
+    p2 = p[::-1]
+    pi2 = compute_prefix_function(p2)
+    gamma = []
+    for j in range(0, m):
+        gamma.append(m-pi[m])
+    for l in range(0, m):
+        j = m-pi2[l]
+        if gamma[j] > l-pi2[l]:
+            gamma[j] = l-pi2[l]
+    return gamma
+
+def boyer_moore(t, p, sigma):
     n = len(t)
     m = len(p)
-    c = 0
+    lam = compute_last_occurence_function(p, m, sigma)
+    gamma = compute_good_suffix_function(p, m)
+    s = 0
+    while s <= n-m:
+        j = m-1
+        while j >= 0 and p[j] == t[s+j]:
+            j-=1
+        if j==-1:
+            print("Muster taucht mit Verschiebung", s-1, "auf.")
+            s = s + gamma[0]
+        else:
+            s = max(gamma[j], j-lam[t[s+j]])
 
-def boyer_moore(t, p):
-    print()
 
-main()
