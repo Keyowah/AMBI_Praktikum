@@ -1,5 +1,7 @@
 from tkinter import filedialog as tkf
 from tkinter import Tk
+from math import *
+from datetime import datetime
 
 Tk().withdraw() #Wir wollen kein Tk-Fenster haben, sondern nur den filedialog
 
@@ -28,7 +30,7 @@ Pratt-Algorithmus\n3: Boyer-Moore-Algorithmus\n"))
     if action3 == 0:
         naiv(t, p)
     elif action3 == 1:
-        rabin_karp(t, p)
+        rabin_karp(t, p, 10)
     elif action3 == 2:
         knuth_morris_pratt(t, p)
     else:
@@ -39,13 +41,50 @@ def naiv(t, p):
     m = len(p)
     c = 0
     for s in range(0, n-m+1):
-        if p[0:m]==t[s:s+m]:
+        if p==t[s:s+m]:
             print("Das Muster taucht mit Verschiebung", s, "auf.")
             c+=1
     print("Gesamt:", c, "Fund(e)." )
+    
 
-def rabin_karp(t, p):
-    print()
+def rabin_karp(text, pattern, d):
+    # Start der Zeitmessung
+    startTime = datetime.now()
+
+    # Initialisierung
+    cSchritte = 1
+    cFunde = 0
+    q = 13
+    n = len(text)
+    m = len(pattern)
+    h = pow(d, m - 1) % q
+    p = 0
+    t = 0
+
+    # Preprocessing
+    for i in range(1, m + 1):
+        p = ((d * p) + pattern[i - 1]) % q
+        t = ((d * t) + text[i - 1]) % q
+
+        # Matching
+        for s in range(n - m + 1):
+            if p == t:
+                if pattern == text[s:s + m]:
+                    cFunde+=1
+                    print("Das Muster taucht mit Verschiebung", s, "auf")
+        if s < (n - m):
+            t = (text[s + m] + d * (t - text[s] * h)) % q
+        cSchritte+=1
+
+        # Messungd er verbrauchten Zeit
+        runtime = datetime.now() - startTime
+
+        # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
+        # wird die Anzahl der Suchschritte ausgegeben
+        print("Gesamt:", cFunde, "Fund(e)")
+        print("Anzahl der Suchschritte:", cSchritte)
+        print("benoetigte Laufzeit:", time, "s")
+
 
 def knuth_morris_pratt(t, p):
     n = len(t)
