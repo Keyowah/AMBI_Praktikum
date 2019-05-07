@@ -241,7 +241,7 @@ def knuth_morris_pratt(text, pattern):
             q = __pi[q - 1]
             c_funde += 1
 
-    # Messungd er verbrauchten Zeit
+    # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
 
     print("Gesamt:", c_funde, "Fund(e)")
