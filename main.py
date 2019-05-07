@@ -26,16 +26,15 @@ def main(*args, **kwargs):
                         "1: String eingeben\n"
                         "Mit 'help' lässt sich ein Hilfetext ausgeben.\n")
     if action1 == "0":
-        print("Bitte Datei im Explorer auswählen... ")
-        path = tkf.askopenfilename(filetypes=[('Alle Dateien', '*')],
-                                   title="Quelle für Text auswählen")
+        print("Bitte eine Datei im Explorer auswählen...")
+        path = tkf.askopenfilename(filetypes=[('Alle Dateien', '*')], title="Quelle für Text auswählen")
         t = open(path, 'r').read().replace('\n', '')
-    elif action1 == "help":
-        help()
     elif action1 == "1":
         t = input("Text:\n")
+    elif action1 == "help":
+        help()
     else:
-        print("Eingabe konnte nicht gelesen werden. Programm wird neu gestartet.\n")
+        print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
 
     action2 = input("Ok! Woher soll der zu prüfende Text stammen?\n"
@@ -43,16 +42,15 @@ def main(*args, **kwargs):
                         "1: String eingeben\n"
                         "Mit 'help' lässt sich ein Hilfetext ausgeben.\n")
     if action2 == "0":
-        print("Bitte Datei im Explorer auswählen...")
-        path = tkf.askopenfilename(filetypes=[('Alle Dateien', '*')],
-                                   title="Quelle für Muster auswählen")
+        print("Bitte eine Datei im Explorer auswählen...")
+        path = tkf.askopenfilename(filetypes=[('Alle Dateien', '*')], title="Quelle für Muster auswählen")
         p = open(path, 'r').read().replace('\n', '')
-    elif action2 == "help":
-        help()
     elif action2 == "1":
         p = input("Muster:\n")
+    elif action2 == "help":
+        help()
     else:
-        print("Eingabe konnte nicht gelesen werden. Programm wird neu gestartet.\n")
+        print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
 
     action3 = input("Ok! Welcher Algorithmus soll für die Suche verwendet werden?\n"
@@ -69,7 +67,7 @@ def main(*args, **kwargs):
     elif action3 == "2":
         knuth_morris_pratt(t, p)
     elif action3 == "3":
-        boyer_moore(t, p, generate_sigma(p))
+        boyer_moore(t, p, generate_sigma(t))
     elif action3 == "4":
         naiv(t, p)
         rabin_karp(t, p, len(generate_sigma(t)))
@@ -78,13 +76,13 @@ def main(*args, **kwargs):
     elif action3 == "help":
         help()
     else:
-        print("Eingabe konnte nicht gelesen werden. Programm wird neu gestartet.\n")
+        print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
 
 
 def help():
     print(
-        "AMBI-Praktikum Aufgabe 1\n"
+        "*** AMBI-Praktikum Aufgabe 1 - Bediedungsanleitung ***\n\n"
         "\tMit diesem Programm können zwei Zeichenketten mit verschiedenen\n"
         "\tAlgorithmen verglichen werden\n"
         "\tZeichenketten können entweder als String oder Datei übergeben werden.\n"
@@ -94,17 +92,15 @@ def help():
         "\t\t2. Wählen Sie eine .fasta Datei oder geben Sie einen String ein\n"
         "\t\t3. Wählen Sie eine Eingabemethode für das gesuchte Pattern\n"
         "\t\t(String oder Pattern) mit den Ziffern 0, 1\n"
-        "\t\t4. Wählen Sie einen Algorithmus für die Auswertung. Dafür\n"
-        "\t\tstehen zur Verfügung:\n"
+        "\t\t4. Wählen Sie einen Algorithmus für die Auswertung.\n"
+        "\t\tDafür stehen zur Verfügung:\n"
         "\t\t\t0: Naiver Algorithmus\n"
         "\t\t\t1: Rabin-Karp-Algorithmus\n"
         "\t\t\t2: Knuth-Morris-Pratt-Algorithmus\n"
         "\t\t\t3: Boyer-Moore-Algorithmus\n"
-        "\t\t\t4: Alle 4 Algorithmen\n"
+        "\t\t\t4: Alle 4 Algorithmen\n\n"
+        "Das Programm wird neugestartet.\n"
     )
-    print("Programm wird neugestartet.\n")
-    main()
-
 
 
 def naiv(t, p):
@@ -123,11 +119,18 @@ def naiv(t, p):
     c_funde = 0
     c_schritte = 0
     for s in range(0, n - m + 1):
-        c_schritte += 1
-        if p == t[s:s + m]:
+        c_schritte += 1 # den nachfolgenden Vergleich zählen
+        ident = 0
+        for i in range(0, m):
+            c_schritte += 1 # nachfolgenden Vergleich zählen
+            if p[i] == t[s+i]:
+                ident += 1
+            else:
+                break
+        if ident == m:
             print("Das Muster taucht mit Verschiebung", s, "auf.")
             c_funde += 1
-            
+
     # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
 
@@ -151,7 +154,7 @@ def rabin_karp(text, pattern, d):
     # Initialisierung
     c_schritte = 0
     c_funde = 0
-    q = 53 # größte Primzahl <= 64
+    q = 59 # kleinste Primzahl <= 64
     n = len(text)
     m = len(pattern)
     h = pow(d, m - 1) % q
@@ -162,27 +165,28 @@ def rabin_karp(text, pattern, d):
     for i in range(0, m):
         p = ((d * p) + ord(pattern[i])) % q
         t = ((d * t) + ord(text[i])) % q
-    print("p:", p)
 
     # Suche nach einem gueltigen Matching. Die aktuelle Position im text muss
     # ueberprueft werden, wenn die Hash-Werte gleich sind. Anschliessend wird
     # der Hash-Wert fuer die Stellen s+1,...,s+m aktualisiert.
     for s in range(0, n - m):
-        if int(p) == int(t):
-            c_schritte += 1
-            if pattern == text[s: s + m]:
+        if p == t:
+            ident = 0
+            for i in range(0, m):
+                c_schritte += 1 # nachfolgenden Vergleich zählen
+                if pattern[i] == text[s+i]:
+                    ident += 1
+                else:
+                    break
+            if ident == m:
                 c_funde += 1
                 print("Das Muster taucht mit Verschiebung", s, "auf.")
         if s < (n - m):
             t = (ord(text[s + m]) + d * (t - ord(text[s]) * h)) % q
-            if 243<=s<=245:
-                print("t:", t)
 
     # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
-
-    # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
-    # wird die Anzahl der Suchschritte ausgegeben
+    
     print("Gesamt:", c_funde, "Fund(e)")
     print("Anzahl der Suchschritte:", c_schritte)
     print("benoetigte Laufzeit:", runtime)
@@ -218,7 +222,7 @@ def knuth_morris_pratt(text, pattern):
     start_time = datetime.now()  # Start der Zeitmessung
 
     # Initialisierung
-    c_schritt = 0
+    c_schritte = 0
     c_funde = 0
     n = len(text)
     m = len(pattern)
@@ -229,7 +233,7 @@ def knuth_morris_pratt(text, pattern):
     for i in range(0, n):
         while q > 0 and pattern[q] != text[i]:
             q = __pi[q - 1]
-        c_schritt += 1
+        c_schritte += 1 # den nachfolgenden Vergleich zählen
         if pattern[q] == text[i]:
             q = q + 1
         if q == m:
@@ -237,13 +241,11 @@ def knuth_morris_pratt(text, pattern):
             q = __pi[q - 1]
             c_funde += 1
 
-    # Messung der verbrauchten Zeit
+    # Messungd er verbrauchten Zeit
     runtime = datetime.now() - start_time
 
-    # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
-    # wird die Anzahl der Suchschritte ausgegeben
     print("Gesamt:", c_funde, "Fund(e)")
-    print("Anzahl der Suchschritte:", c_schritt)
+    print("Anzahl der Suchschritte:", c_schritte)
     print("benoetigte Laufzeit:", runtime)
 
 
@@ -265,6 +267,7 @@ def compute_last_occurence_function(pattern, m, sigma):
 
 def compute_good_suffix_function(p, m):
     """
+
     :param p:
     :param m:
     :return:
@@ -274,7 +277,7 @@ def compute_good_suffix_function(p, m):
     pi2 = compute_prefix_function(p2)
     __gamma = []
     for j in range(0, m):
-        __gamma.append(m - __pi[m - 1])
+        __gamma.append(m - __pi[m-1])
     for l in range(0, m):
         j = m-1 - pi2[l]
         if __gamma[j] > l+1 - pi2[l]:
@@ -294,23 +297,21 @@ def boyer_moore(t, p, sigma):
 
     start_time = datetime.now()  # Start der Zeitmessung
 
-    c_schritt = 0
+    c_schritte = 0
     c_funde = 0
     n = len(t)
     m = len(p)
     lam = compute_last_occurence_function(p, m, sigma)
-    # print(lam)
     __gamma = compute_good_suffix_function(p, m)
-    # print(__gamma)
     s = 0
     while s <= n - m:
         j = m - 1
-        c_schritt += 1
+        c_schritte += 1 # nachfolgenden Vergleich zählen
         while j >= 0 and p[j] == t[s + j]:
+            c_schritte += 1 # Vergleich für die Bed. des nächsten Durchlaufs
             j -= 1
-            c_schritt += 1
         if j == -1:
-            c_schritt -= 1 # letzter Versuch für die while-Bed. benötigt keinen Zeichenvergleich
+            c_schritte -= 1 # While-Bed ist schon an j>=0 gescheitert
             print("Muster taucht mit Verschiebung", s, "auf.")
             s += __gamma[0]
             c_funde += 1
@@ -321,7 +322,7 @@ def boyer_moore(t, p, sigma):
     runtime = datetime.now() - start_time
 
     print("Gesamt:", c_funde, "Fund(e)")
-    print("Anzahl der Suchschritte:", c_schritt)
+    print("Anzahl der Suchschritte:", c_schritte)
     print("benoetigte Laufzeit:", runtime)
 
 
