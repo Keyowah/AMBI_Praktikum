@@ -136,7 +136,7 @@ def naiv(t, p):
 
     print("Gesamt:", c_funde, "Fund(e)")
     print("Anzahl der Suchschritte:", c_schritte)
-    print("benoetigte Laufzeit:", runtime)
+    print("Benoetigte Laufzeit:", runtime)
 
 
 def rabin_karp(text, pattern, d):
@@ -152,9 +152,10 @@ def rabin_karp(text, pattern, d):
     start_time = datetime.now()  # Start der Zeitmessung
 
     # Initialisierung
+    print("d:", d)
     c_schritte = 0
     c_funde = 0
-    q = 59 # kleinste Primzahl <= 64
+    q = 61 # größte Primzahl <= 64
     n = len(text)
     m = len(pattern)
     h = pow(d, m - 1) % q
@@ -165,11 +166,10 @@ def rabin_karp(text, pattern, d):
     for i in range(0, m):
         p = ((d * p) + ord(pattern[i])) % q
         t = ((d * t) + ord(text[i])) % q
-
     # Suche nach einem gueltigen Matching. Die aktuelle Position im text muss
     # ueberprueft werden, wenn die Hash-Werte gleich sind. Anschliessend wird
     # der Hash-Wert fuer die Stellen s+1,...,s+m aktualisiert.
-    for s in range(0, n - m):
+    for s in range(0, n - m + 1):
         if p == t:
             ident = 0
             for i in range(0, m):
@@ -189,7 +189,7 @@ def rabin_karp(text, pattern, d):
     
     print("Gesamt:", c_funde, "Fund(e)")
     print("Anzahl der Suchschritte:", c_schritte)
-    print("benoetigte Laufzeit:", runtime)
+    print("Benoetigte Laufzeit:", runtime)
 
 
 def compute_prefix_function(pattern):
@@ -246,7 +246,7 @@ def knuth_morris_pratt(text, pattern):
 
     print("Gesamt:", c_funde, "Fund(e)")
     print("Anzahl der Suchschritte:", c_schritte)
-    print("benoetigte Laufzeit:", runtime)
+    print("Benoetigte Laufzeit:", runtime)
 
 
 def compute_last_occurence_function(pattern, m, sigma):
@@ -323,7 +323,7 @@ def boyer_moore(t, p, sigma):
 
     print("Gesamt:", c_funde, "Fund(e)")
     print("Anzahl der Suchschritte:", c_schritte)
-    print("benoetigte Laufzeit:", runtime)
+    print("Benoetigte Laufzeit:", runtime)
 
 
 def generate_sigma(text):
