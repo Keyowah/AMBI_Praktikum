@@ -37,7 +37,7 @@ def main(*args, **kwargs):
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
 
-    action2 = input("Ok! Woher soll der zu prüfende Text stammen?\n"
+    action2 = input("Ok! Woher soll das gesuchte Pattern stammen?\n"
                         "0: Aus Datei einlesen\n"
                         "1: String eingeben\n"
                         "Mit 'help' lässt sich ein Hilfetext ausgeben.\n")
@@ -139,6 +139,62 @@ def naiv(t, p):
     print("Benoetigte Laufzeit:", runtime)
 
 
+#def rabin_karp(text, pattern, d):
+#    """
+#
+#    :param text:
+#    :param pattern:
+#    :param d:
+#    :return:
+#    """
+#    print("\n*** Rabin-Karp ***\n")
+#
+#    start_time = datetime.now()  # Start der Zeitmessung
+#
+    # Initialisierung
+#    print("d:", d)
+#    c_schritte = 0
+#    c_funde = 0
+#    q = 57 # größte Primzahl <= 64
+#    n = len(text)
+#    m = len(pattern)
+#    p = 0
+#    t = 0
+    # Damit pow(d,m-1) keinen Overflow produzieren kann, verwenden wir
+    # (x * y) mod q = (x mod q)*(y mod q) mod q
+#    h = d % q
+#    for i in range (1, m):
+#        h = (h * (d % q)) % q
+#        
+    # Berechnung der Hash-Werte von pattern und den ersten m Stellen von text
+#    for i in range(0, m):
+#        p = ((d * p) + ord(pattern[i])) % q
+#        t = ((d * t) + ord(text[i])) % q
+    # Suche nach einem gueltigen Matching. Die aktuelle Position im text muss
+    # ueberprueft werden, wenn die Hash-Werte gleich sind. Anschliessend wird
+    # der Hash-Wert fuer die Stellen s+1,...,s+m aktualisiert.
+#    for s in range(0, n - m + 1):
+#        if p == t:
+#            ident = 0
+#            for i in range(0, m):
+#                c_schritte += 1 # nachfolgenden Vergleich zählen
+#                if pattern[i] == text[s+i]:
+#                    ident += 1
+#                else:
+#                    break
+#            if ident == m:
+#                c_funde += 1
+#                print("Das Muster taucht mit Verschiebung", s, "auf.")
+#        if s < (n - m):
+#            t = (ord(text[s + m]) + d * (t - ord(text[s]) * h)) % q
+
+    # Messung der verbrauchten Zeit
+#    runtime = datetime.now() - start_time
+    
+#    print("Gesamt:", c_funde, "Fund(e)")
+#    print("Anzahl der Suchschritte:", c_schritte)
+#    print("Benoetigte Laufzeit:", runtime)
+
 def rabin_karp(text, pattern, d):
     """
 
@@ -152,46 +208,47 @@ def rabin_karp(text, pattern, d):
     start_time = datetime.now()  # Start der Zeitmessung
 
     # Initialisierung
-    print("d:", d)
     c_schritte = 0
     c_funde = 0
-    q = 61 # größte Primzahl <= 64
+    q = 59
     n = len(text)
     m = len(pattern)
-    h = pow(d, m - 1) % q
+    #h = pow(d, m - 1) % q
     p = 0
     t = 0
-
+    # Damit pow(d,m-1) keinen Overflow produzieren kann, verwenden wir
+    # (x * y) mod q = (x mod q)*(y mod q) mod q
+    h = d % q
+    for i in range (1, m - 1): # nur bis m-2 weil h=h^1 schon vorliegt
+        h = (h * (d % q)) % q
+        
     # Berechnung der Hash-Werte von pattern und den ersten m Stellen von text
     for i in range(0, m):
         p = ((d * p) + ord(pattern[i])) % q
         t = ((d * t) + ord(text[i])) % q
+
     # Suche nach einem gueltigen Matching. Die aktuelle Position im text muss
     # ueberprueft werden, wenn die Hash-Werte gleich sind. Anschliessend wird
     # der Hash-Wert fuer die Stellen s+1,...,s+m aktualisiert.
-    for s in range(0, n - m + 1):
+    for s in range(0, n - m):
         if p == t:
-            ident = 0
-            for i in range(0, m):
-                c_schritte += 1 # nachfolgenden Vergleich zählen
-                if pattern[i] == text[s+i]:
-                    ident += 1
-                else:
-                    break
-            if ident == m:
+            c_schritte += 1
+            if pattern == text[s: s + m]:
                 c_funde += 1
                 print("Das Muster taucht mit Verschiebung", s, "auf.")
         if s < (n - m):
             t = (ord(text[s + m]) + d * (t - ord(text[s]) * h)) % q
 
-    # Messung der verbrauchten Zeit
-    runtime = datetime.now() - start_time
-    
+        # Messung der verbrauchten Zeit
+        runtime = datetime.now() - start_time
+
+    # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
+    # wird die Anzahl der Suchschritte ausgegeben
     print("Gesamt:", c_funde, "Fund(e)")
     print("Anzahl der Suchschritte:", c_schritte)
-    print("Benoetigte Laufzeit:", runtime)
+    print("benoetigte Laufzeit:", runtime)
 
-
+    
 def compute_prefix_function(pattern):
     """
 
@@ -201,9 +258,14 @@ def compute_prefix_function(pattern):
     m = len(pattern)
     __pi = [0]
     k = 0
-    for q in range(1, m):
+    k_alt = 0
+    for q in range(1, m):        
         while k > 0 and pattern[k] != pattern[q]:
+            k_alt = k
             k = __pi[k]
+            # Verhinderung einer Endlosschleife, falls k = __pi[k] 
+            if k == k_alt:
+                k = 0
         if pattern[k] == pattern[q]:
             k = k + 1
         __pi.append(k)
@@ -228,7 +290,6 @@ def knuth_morris_pratt(text, pattern):
     m = len(pattern)
     __pi = compute_prefix_function(pattern)
     q = 0
-
     # Matching
     for i in range(0, n):
         while q > 0 and pattern[q] != text[i]:
@@ -312,7 +373,7 @@ def boyer_moore(t, p, sigma):
             j -= 1
         if j == -1:
             c_schritte -= 1 # While-Bed ist schon an j>=0 gescheitert
-            print("Muster taucht mit Verschiebung", s, "auf.")
+            print("Das Muster taucht mit Verschiebung", s, "auf.")
             s += __gamma[0]
             c_funde += 1
         else:
