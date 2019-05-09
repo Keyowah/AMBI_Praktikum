@@ -139,62 +139,6 @@ def naiv(t, p):
     print("Benoetigte Laufzeit:", runtime)
 
 
-#def rabin_karp(text, pattern, d):
-#    """
-#
-#    :param text:
-#    :param pattern:
-#    :param d:
-#    :return:
-#    """
-#    print("\n*** Rabin-Karp ***\n")
-#
-#    start_time = datetime.now()  # Start der Zeitmessung
-#
-    # Initialisierung
-#    print("d:", d)
-#    c_schritte = 0
-#    c_funde = 0
-#    q = 57 # größte Primzahl <= 64
-#    n = len(text)
-#    m = len(pattern)
-#    p = 0
-#    t = 0
-    # Damit pow(d,m-1) keinen Overflow produzieren kann, verwenden wir
-    # (x * y) mod q = (x mod q)*(y mod q) mod q
-#    h = d % q
-#    for i in range (1, m):
-#        h = (h * (d % q)) % q
-#        
-    # Berechnung der Hash-Werte von pattern und den ersten m Stellen von text
-#    for i in range(0, m):
-#        p = ((d * p) + ord(pattern[i])) % q
-#        t = ((d * t) + ord(text[i])) % q
-    # Suche nach einem gueltigen Matching. Die aktuelle Position im text muss
-    # ueberprueft werden, wenn die Hash-Werte gleich sind. Anschliessend wird
-    # der Hash-Wert fuer die Stellen s+1,...,s+m aktualisiert.
-#    for s in range(0, n - m + 1):
-#        if p == t:
-#            ident = 0
-#            for i in range(0, m):
-#                c_schritte += 1 # nachfolgenden Vergleich zählen
-#                if pattern[i] == text[s+i]:
-#                    ident += 1
-#                else:
-#                    break
-#            if ident == m:
-#                c_funde += 1
-#                print("Das Muster taucht mit Verschiebung", s, "auf.")
-#        if s < (n - m):
-#            t = (ord(text[s + m]) + d * (t - ord(text[s]) * h)) % q
-
-    # Messung der verbrauchten Zeit
-#    runtime = datetime.now() - start_time
-    
-#    print("Gesamt:", c_funde, "Fund(e)")
-#    print("Anzahl der Suchschritte:", c_schritte)
-#    print("Benoetigte Laufzeit:", runtime)
-
 def rabin_karp(text, pattern, d):
     """
 
@@ -213,9 +157,9 @@ def rabin_karp(text, pattern, d):
     q = 59
     n = len(text)
     m = len(pattern)
-    #h = pow(d, m - 1) % q
     p = 0
     t = 0
+    # h = pow(d, m - 1) % q
     # Damit pow(d,m-1) keinen Overflow produzieren kann, verwenden wir
     # (x * y) mod q = (x mod q)*(y mod q) mod q
     h = d % q
