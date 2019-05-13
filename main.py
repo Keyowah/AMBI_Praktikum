@@ -4,21 +4,22 @@ from tkinter import Tk
 from math import *
 from datetime import datetime
 
-Tk().withdraw()  # Wir wollen kein Tk-Fenster haben, sondern nur den filedialog
+Tk().withdraw() # Wir wollen kein Tk-Fenster haben, sondern nur den filedialog
 
 ''' Verwendete Variablen
 
 t = der zu durchsuchende Text
 p = der zu findende Pattern
-m = Länge des Textes
-sigma = Liste der Character im Pattern
+m = Laenge des Textes
+sigma = Liste der Character im uebergebenen Text
 '''
 
 
 def main(*args, **kwargs):
     """
-    Programm
-    :return:
+    Die main() stellt die Schnittstelle zum Benutzer. Hier werden alle benoetigten Eingaben abgefragt und die
+    gewuenschten Algorithmen mit den entsprechenden Parametern aufgerufen. Wenn es zu einem Eingabefehler kommt,
+    startet das Programm neu.
     """
 
     action1 = input("Woher soll der zu prüfende Text stammen?\n"
@@ -103,27 +104,30 @@ def help():
     )
 
 
-def naiv(t, p):
+def naiv(text, pattern):
     """
-
-    :param t:
-    :param p:
-    :return:
+    Der Algorithmus ueberprueft nacheinander jede Stelle zwischen 0 und n-m im Text als potenziellen Anfang des Patterns.
+    Daher wird jede Stelle im Text bis zu m mal betrachtet.
+    :param t: der zu ueberpruefende Text, string
+    :param p: das gesuchte Pattern, string
+    :Ausgabe: der Algorithmus gibt die Verschiebungen fuer alle gefunden Pattern im Text an.
+    Ausserdem wird die Anzahl der Funde und die benoetigte Anzahl der Vergleiche von Text und Pattern
+    gezaehlt und die Laufzeit gemessen und ausgegeben.
     """
     print("\n*** Naiv ***\n")
 
     start_time = datetime.now()  # Start der Zeitmessung
 
-    n = len(t)
-    m = len(p)
+    n = len(text)
+    m = len(pattern)
     c_funde = 0
     c_schritte = 0
     for s in range(0, n - m + 1):
-        c_schritte += 1 # den nachfolgenden Vergleich zählen
+        # Pruefe, ob pattern mit Verschiebung s im text auftaucht
         ident = 0
         for i in range(0, m):
             c_schritte += 1 # nachfolgenden Vergleich zählen
-            if p[i] == t[s+i]:
+            if pattern[i] == text[s+i]:
                 ident += 1
             else:
                 break
@@ -141,11 +145,15 @@ def naiv(t, p):
 
 def rabin_karp(text, pattern, d):
     """
-
-    :param text:
-    :param pattern:
-    :param d:
-    :return:
+    Der Algorithmus bestimmt fuer jeden Textabschnitt der Groesse m iterativ einen Hashwert mit Hilfe der Horners Rule. Die
+    betrachteten Buchstaben werden in ihre ASCII Werte umgewandelt, damit mit ihnen gerechnet werden kann. Der in einem
+    Schritt betrachtetete Textabschnitt kann nur dem Pattern entsprechen, wenn deren Hash-Werte gleich sind.
+    :param text: zu ueberpruefender Text, string
+    :param pattern: gesuchtes Pattern, string
+    :param d: Groesse des Alphabets von Text
+    :Ausgabe: der Algorithmus gibt die Verschiebungen fuer alle gefunden Pattern im Text an.
+    Ausserdem wird die Anzahl der Funde und die benoetigte Anzahl der Vergleiche von Text und Pattern
+    gezaehlt und die Laufzeit gemessen und ausgegeben.
     """
     print("\n*** Rabin-Karp ***\n")
 
@@ -154,14 +162,13 @@ def rabin_karp(text, pattern, d):
     # Initialisierung
     c_schritte = 0
     c_funde = 0
-    q = 59
+    q = 61
     n = len(text)
     m = len(pattern)
     p = 0
     t = 0
-    # h = pow(d, m - 1) % q
     # Damit pow(d,m-1) keinen Overflow produzieren kann, verwenden wir
-    # (x * y) mod q = (x mod q)*(y mod q) mod q
+    # (x * y) mod q = (x mod q)*(y mod q) mod q zur Berechnung von h= pow(d,m-1) % q
     h = d % q
     for i in range (1, m - 1): # nur bis m-2 weil h=h^1 schon vorliegt
         h = (h * (d % q)) % q
@@ -174,12 +181,18 @@ def rabin_karp(text, pattern, d):
     # Suche nach einem gueltigen Matching. Die aktuelle Position im text muss
     # ueberprueft werden, wenn die Hash-Werte gleich sind. Anschliessend wird
     # der Hash-Wert fuer die Stellen s+1,...,s+m aktualisiert.
-    for s in range(0, n - m):
+    for s in range(0, n - m + 1):
         if p == t:
-            c_schritte += 1
-            if pattern == text[s: s + m]:
-                c_funde += 1
+            ident = 0
+            for i in range(0, m):
+                c_schritte += 1 # nachfolgenden Vergleich zählen
+                if pattern[i] == text[s+i]:
+                    ident += 1
+                else:
+                    break
+            if ident == m:
                 print("Das Muster taucht mit Verschiebung", s, "auf.")
+                c_funde += 1
         if s < (n - m):
             t = (ord(text[s + m]) + d * (t - ord(text[s]) * h)) % q
 
@@ -195,14 +208,15 @@ def rabin_karp(text, pattern, d):
     
 def compute_prefix_function(pattern):
     """
-
-    :param pattern:
-    :return:
+    Der Algorithmus ueberprueft den Pattern nach shifts in sich selbst.
+    :param pattern: zu ueberpruefendes Pattern
+    :return: __pi[i] ist die Laenge des laengsten Praefixes von pattern, der ein Suffix von pattern[1,..,i] ist
     """
     m = len(pattern)
     __pi = [0]
     k = 0
     k_alt = 0
+    # Ermittlung der Eintraege 1 bis m-1 von __pi
     for q in range(1, m):        
         while k > 0 and pattern[k] != pattern[q]:
             k_alt = k
@@ -218,10 +232,13 @@ def compute_prefix_function(pattern):
 
 def knuth_morris_pratt(text, pattern):
     """
-
-    :param text:
-    :param pattern:
-    :return:
+    Funktioniert aehnlich wie der Ansatz mittels DFA. Nutzt Enthaltensein des Patterns in sich selbst aus, um bessere
+    Erhoehungen des Shifts s zu erreichen. Liest dafuer den gesamten Text von links nach rechts.
+    :param text: zu ueberpruefendes Pattern, string
+    :param pattern: gesuchtes Pattern, string
+    :Ausgabe: der Algorithmus gibt die Verschiebungen fuer alle gefunden Pattern im Text an.
+    Ausserdem wird die Anzahl der Funde und die benoetigte Anzahl der Vergleiche von Text und Pattern
+    gezaehlt und die Laufzeit gemessen und ausgegeben.
     """
     print("\n*** Knuth-Morris-Pratt ***\n")
 
@@ -232,17 +249,22 @@ def knuth_morris_pratt(text, pattern):
     c_funde = 0
     n = len(text)
     m = len(pattern)
+    # Vorverarbeitung des Patterns fuer Werte fuer Enthaltensein in sich selbst
     __pi = compute_prefix_function(pattern)
     q = 0
-    # Matching
+    # q haelt fest, wie weit der pattern an der aktuellen Stelle im Text bisher gematcht wurde (wie bei DFA)
+    # das Matching erfolgt beim Lesen des Texts Buchstabe fuer Buchstabe (wie bei DFA)
     for i in range(0, n):
         while q > 0 and pattern[q] != text[i]:
+            # Wie weit muss q reduziert werden? Das steht an der entsprechenden Stelle in __pi
             q = __pi[q - 1]
         c_schritte += 1 # den nachfolgenden Vergleich zählen
         if pattern[q] == text[i]:
+            # Ein weiteres Zeichen wurde gematcht
             q = q + 1
         if q == m:
-            print("Das Muster taucht mit Verschiebung", i + 1 - m, "auf.")
+            print("Das Muster taucht mit Verschiebung", i - m + 1, "auf.")
+            # Aktualisieren von q wie oben
             q = __pi[q - 1]
             c_funde += 1
 
@@ -256,11 +278,13 @@ def knuth_morris_pratt(text, pattern):
 
 def compute_last_occurence_function(pattern, m, sigma):
     """
-    Finds the last occurrence of each character in sigma and returns a dictionary of these pairs
-    :param pattern: string
-    :param m: length of the string pattern
-    :param sigma: list of unique characters
-    :return: a dictionary with form {character: last position in pattern}
+    Funktion zur Realisierung der bad-character Heuristik.
+    Findet das letzte Auftreten fuer jeden Buchstaben im Alphabet im Pattern und gibt ein Dictionary
+    mit den entsprechenden Paaren zurueck.
+    :param pattern: zu ueberpruefendes Pattern, string
+    :param m: Laenge von pattern
+    :param sigma: Alphabet des Textes, in dem der Pattern gesucht wird
+    :return: ein Dictionary der Form {Buchstabe: letzte Position im Pattern}
     """
     lam = {}
     for a in sigma:
@@ -270,17 +294,23 @@ def compute_last_occurence_function(pattern, m, sigma):
     return lam
 
 
-def compute_good_suffix_function(p, m):
+def compute_good_suffix_function(pattern, m):
+    """
+    Funktion zur Realisierung der good-suffix Heuristik.
+    Gibt fuer jede Position 0<=j<=m-1 an, wie weit der Pattern verschoben werden darf, ohne ein Mismatch
+    des bisher gematchten 'good-suffix' im Text mit dem Pattern zu erzeugen oder ein Matching zu verpassen.
+    :param pattern: zu ueberpruefendes Pattern, string
+    :param m: Laenge von pattern
+    :return: Eine Liste mit den obig beschriebenen Werten fuer jede Position 0<=j<=m-1 im Pattern
     """
 
-    :param p:
-    :param m:
-    :return:
-    """
-    __pi = compute_prefix_function(p)
-    p2 = p[::-1]
-    pi2 = compute_prefix_function(p2)
+    # Vorverarbeitung des Patterns
+    __pi = compute_prefix_function(pattern)
+    pattern2 = pattern[::-1] # umgekehrtes Pattern
+    pi2 = compute_prefix_function(pattern2)
+    # Initialisierung der Liste
     __gamma = []
+    # Ermittle Einträge gemaess Rechnung aus der Vorlesung
     for j in range(0, m):
         __gamma.append(m - __pi[m-1])
     for l in range(0, m):
@@ -292,11 +322,15 @@ def compute_good_suffix_function(p, m):
 
 def boyer_moore(t, p, sigma):
     """
-
+    Der Algorithmus funktioniert wie der naive Algorithmus, nur dass er das Muster jeweils
+    von rechts nach links liest und bei Mismatches durch Anwendung von Heuristiken bessere
+    Erhöhungen des Shifts s als 1 erzielt. Die Heuristiken heissen bad-character und good-suffix.
     :param t:
     :param p:
     :param sigma:
-    :return:
+    :Ausgabe: der Algorithmus gibt die Verschiebungen fuer alle gefunden Pattern im Text an.
+    Ausserdem wird die Anzahl der Funde und die benoetigte Anzahl der Vergleiche von Text und Pattern
+    gezaehlt und die Laufzeit gemessen und ausgegeben.
     """
     print("\n*** Boyer-Moore ***\n")
 
@@ -306,10 +340,14 @@ def boyer_moore(t, p, sigma):
     c_funde = 0
     n = len(t)
     m = len(p)
+    # Woerterbuch fuer bad-character Heuristik
     lam = compute_last_occurence_function(p, m, sigma)
+    # Liste fuer good-suffix Heuristik
     __gamma = compute_good_suffix_function(p, m)
     s = 0
+    # es gibt n - m + 1 mögliche shifts
     while s <= n - m:
+        # durchlaufe das Muster von hinten nach vorne
         j = m - 1
         c_schritte += 1 # nachfolgenden Vergleich zählen
         while j >= 0 and p[j] == t[s + j]:
@@ -318,9 +356,11 @@ def boyer_moore(t, p, sigma):
         if j == -1:
             c_schritte -= 1 # While-Bed ist schon an j>=0 gescheitert
             print("Das Muster taucht mit Verschiebung", s, "auf.")
+            # Anwendung der good-suffix Heuristik fuer j=0
             s += __gamma[0]
             c_funde += 1
         else:
+            # Ermittlung, welche der beiden Heuristiken die größere Verschiebung liefert
             s += max(__gamma[j], j - lam[t[s + j]])
 
     # Messung der verbrauchten Zeit
@@ -333,9 +373,9 @@ def boyer_moore(t, p, sigma):
 
 def generate_sigma(text):
     """
-    Generiert ein List von Einzigartigen Buchstaben der Zeichenkette text
-    :param text:
-    :return:
+    Generiert eine Liste von einzigartigen Buchstaben aus der Zeichenkette text,
+    also das zugehoerige Alphabet.
+    :return: Alphabet von text
     """
     return list(set(list(text)))
 
