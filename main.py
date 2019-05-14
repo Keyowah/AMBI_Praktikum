@@ -2,17 +2,17 @@ import sys
 from tkinter import filedialog as tkf
 from tkinter import Tk
 from math import *
-from datetime import datetime
+from datetime import *
 
-Tk().withdraw() # Wir wollen kein Tk-Fenster haben, sondern nur den filedialog
+Tk().withdraw() # Wir wollen kein Tk-Fenster haben, sondern nur den filedialog für die Dateiauswahl im Explorer
 
-''' Verwendete Variablen
+"""Verwendete Variablen
 
 t = der zu durchsuchende Text
 p = der zu findende Pattern
-m = Laenge des Textes
-sigma = Liste der Character im uebergebenen Text
-'''
+n = Laenge des Textes
+m = Laenge des Patterns
+sigma = Liste der Character im uebergebenen Text"""
 
 
 def main(*args, **kwargs):
@@ -46,7 +46,8 @@ def main(*args, **kwargs):
     if action2 == "0":
         print("Bitte eine Datei im Explorer auswaehlen...")
         path = tkf.askopenfilename(filetypes=[('Alle Dateien', '*')], title="Quelle fuer Muster auswaehlen")
-        p = open(path, 'r').read().replace('\n', '')
+        p = open(path, 'r', encoding = "utf-8").read()
+        p = p[p.index('\n')+1:].replace('\n', '') # Erste Zeile und Umbrueche loeschen
     elif action2 == "1":
         p = input("Muster:\n")
     elif action2 == "help":
@@ -83,6 +84,9 @@ def main(*args, **kwargs):
 
 
 def help():
+    """
+    Gibt eine Bedienungsanleitung aus
+    """
     print(
         "*** AMBI-Praktikum Aufgabe 1 - Bediedungsanleitung ***\n\n"
         "\tMit diesem Programm koennen zwei Zeichenketten mit verschiedenen\n"
@@ -103,6 +107,15 @@ def help():
         "\t\t\t4: Alle 4 Algorithmen\n\n"
         "Das Programm wird neugestartet.\n"
     )
+
+
+def printresults(c_funde, c_schritte, runtime):
+    """
+    Gibt die Anzahl der Suchergebnisse, der Suchschritte und die Laufzeit aus
+    """
+    print("Gesamt:", c_funde, "Fund(e)")
+    print("Anzahl der Suchschritte:", c_schritte)
+    print("Benoetigte Laufzeit:", runtime)
 
 
 def naiv(text, pattern):
@@ -138,10 +151,9 @@ def naiv(text, pattern):
 
     # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
-
-    print("Gesamt:", c_funde, "Fund(e)")
-    print("Anzahl der Suchschritte:", c_schritte)
-    print("Benoetigte Laufzeit:", runtime)
+    # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
+    # wird die Anzahl der Suchschritte ausgegeben
+    printresults(c_funde, c_schritte, runtime)
 
 
 def rabin_karp(text, pattern, d):
@@ -197,14 +209,9 @@ def rabin_karp(text, pattern, d):
         if s < (n - m):
             t = (ord(text[s + m]) + d * (t - ord(text[s]) * h)) % q
 
-        # Messung der verbrauchten Zeit
-        runtime = datetime.now() - start_time
-
-    # nachdem der gesamte Text nach dem Pattern durchsucht wurde,
-    # wird die Anzahl der Suchschritte ausgegeben
-    print("Gesamt:", c_funde, "Fund(e)")
-    print("Anzahl der Suchschritte:", c_schritte)
-    print("benoetigte Laufzeit:", runtime)
+    # Messung der verbrauchten Zeit
+    runtime = datetime.now() - start_time
+    printresults(c_funde, c_schritte, runtime)
 
     
 def compute_prefix_function(pattern):
@@ -275,12 +282,9 @@ def knuth_morris_pratt(text, pattern):
 
     # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
+    printresults(c_funde, c_schritte, runtime)
 
-    print("Gesamt:", c_funde, "Fund(e)")
-    print("Anzahl der Suchschritte:", c_schritte)
-    print("Benoetigte Laufzeit:", runtime)
-
-
+    
 def compute_last_occurence_function(pattern, m, sigma):
     """
     Funktion zur Realisierung der bad-character Heuristik.
@@ -356,8 +360,8 @@ def boyer_moore(text, pattern, sigma):
         j = m - 1
         c_schritte += 1 # nachfolgenden Vergleich zaehlen
         while j >= 0 and pattern[j] == text[s + j]:
-            c_schritte += 1 # Vergleich fuer die Bed. des naechsten Durchlaufs
             j -= 1
+            c_schritte += 1 # Vergleich fuer die Bed. des naechsten Durchlaufs
         if j == -1:
             c_schritte -= 1 # While-Bed ist schon an j>=0 gescheitert
             print("Das Muster taucht mit Verschiebung", s, "auf.")
@@ -370,11 +374,8 @@ def boyer_moore(text, pattern, sigma):
 
     # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
-
-    print("Gesamt:", c_funde, "Fund(e)")
-    print("Anzahl der Suchschritte:", c_schritte)
-    print("Benoetigte Laufzeit:", runtime)
-
+    printresults(c_funde, c_schritte, runtime)
+    
 
 def generate_sigma(text):
     """
