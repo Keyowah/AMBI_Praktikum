@@ -29,7 +29,8 @@ def main(*args, **kwargs):
     if action1 == "0":
         print("Bitte eine Datei im Explorer auswaehlen...")
         path = tkf.askopenfilename(filetypes=[('Alle Dateien', '*')], title="Quelle fuer Text auswaehlen")
-        t = open(path, 'r').read().replace('\n', '')
+        t = open(path, 'r', encoding = "utf-8").read()
+        t = t[t.index('\n')+1:].replace('\n', '') # Erste Zeile und Umbrueche loeschen
     elif action1 == "1":
         t = input("Text:\n")
     elif action1 == "help":
@@ -255,7 +256,9 @@ def knuth_morris_pratt(text, pattern):
     # q haelt fest, wie weit der pattern an der aktuellen Stelle im Text bisher gematcht wurde (wie bei DFA)
     # das Matching erfolgt beim Lesen des Texts Buchstabe fuer Buchstabe (wie bei DFA)
     for i in range(0, n):
+        c_schritte += 1 # nachfolgenden Vergleich in While-Bed zaehlen
         while q > 0 and pattern[q] != text[i]:
+            c_schritte += 1 # Vergleich im naechsten Durchlauf zaehlen
             # Wie weit muss q reduziert werden? Das steht an der entsprechenden Stelle in __pi
             q = __pi[q - 1]
         c_schritte += 1 # den nachfolgenden Vergleich zaehlen
@@ -361,7 +364,7 @@ def boyer_moore(text, pattern, sigma):
             c_funde += 1
         else:
             # Ermittlung, welche der beiden Heuristiken die groessere Verschiebung liefert
-            s += max(__gamma[j], j - lam[t[s + j]])
+            s += max(__gamma[j], j - lam[text[s + j]])
 
     # Messung der verbrauchten Zeit
     runtime = datetime.now() - start_time
