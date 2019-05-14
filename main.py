@@ -256,11 +256,13 @@ def knuth_morris_pratt(text, pattern):
     # q haelt fest, wie weit der pattern an der aktuellen Stelle im Text bisher gematcht wurde (wie bei DFA)
     # das Matching erfolgt beim Lesen des Texts Buchstabe fuer Buchstabe (wie bei DFA)
     for i in range(0, n):
-        c_schritte += 1 # nachfolgenden Vergleich in While-Bed zaehlen
+        if q > 0:
+            c_schritte += 1 # nachfolgenden Vergleich in While-Bed zaehlen
         while q > 0 and pattern[q] != text[i]:
-            c_schritte += 1 # Vergleich im naechsten Durchlauf zaehlen
             # Wie weit muss q reduziert werden? Das steht an der entsprechenden Stelle in __pi
             q = __pi[q - 1]
+            if q > 0:
+                c_schritte += 1 # Vergleich im naechsten Durchlauf zaehlen
         c_schritte += 1 # den nachfolgenden Vergleich zaehlen
         if pattern[q] == text[i]:
             # Ein weiteres Zeichen wurde gematcht
