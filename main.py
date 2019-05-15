@@ -35,6 +35,7 @@ def main(*args, **kwargs):
         t = input("Text:\n")
     elif action1 == "help":
         help()
+        main()
     else:
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
@@ -52,6 +53,7 @@ def main(*args, **kwargs):
         p = input("Muster:\n")
     elif action2 == "help":
         help()
+        main()
     else:
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
@@ -78,6 +80,7 @@ def main(*args, **kwargs):
         boyer_moore(t, p, generate_sigma(t))
     elif action3 == "help":
         help()
+        main()
     else:
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
