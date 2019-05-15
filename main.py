@@ -36,9 +36,11 @@ def main(*args, **kwargs):
     elif action1 == "help":
         help()
         main()
+        return # alten Funktionsaufruf abbrechen
     else:
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
+        return
 
     action2 = input("Ok! Woher soll das gesuchte Pattern stammen?\n"
                         "0: Aus Datei einlesen\n"
@@ -54,9 +56,11 @@ def main(*args, **kwargs):
     elif action2 == "help":
         help()
         main()
+        return
     else:
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
+        return
 
     action3 = input("Ok! Welcher Algorithmus soll fuer die Suche verwendet werden?\n"
                         "0: Naiver Algorithmus\n"
@@ -81,9 +85,11 @@ def main(*args, **kwargs):
     elif action3 == "help":
         help()
         main()
+        return
     else:
         print("Eingabe konnte nicht gelesen werden. Programm wird neugestartet.\n")
         main()
+        return
 
 
 def help():
